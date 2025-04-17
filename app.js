@@ -1,6 +1,6 @@
 // Supabase URL and anon key (Replace with your actual credentials)
 const supabaseUrl = 'https://kghqkcbrxnbytmchilcj.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnaHFrY2JyeG5ieXRtY2hpbGNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4ODIxMDYsImV4cCI6MjA2MDQ1ODEwNn0.Ya4M9Kmmpj_zfIqyiSj6avIqpvLOeuj8b2AoTU0N6Mc;  // Replace with your new anon key
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnaHFrY2JyeG5ieXRtY2hpbGNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4ODIxMDYsImV4cCI6MjA2MDQ1ODEwNn0.Ya4M9Kmmpj_zfIqyiSj6avIqpvLOeuj8b2AoTU0N6Mc';  // Replace with your new anon key
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 // DOM Elements
