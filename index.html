@@ -27,7 +27,7 @@
         .gallery-item {
             margin: 20px;
             text-align: center;
-            max-width: 200px;
+            max-width: 400px;
         }
 
         .gallery img {
@@ -66,19 +66,6 @@
             font-size: 1rem;
         }
 
-        .filter-container {
-            margin-top: 20px;
-        }
-
-        .filter-container select {
-            padding: 10px;
-            font-size: 1rem;
-            background-color: #555;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-
         .favorite-btn {
             margin-top: 5px;
             padding: 5px 10px;
@@ -101,16 +88,7 @@
     <h1>Image Gallery</h1>
 
     <div class="search-container">
-        <input type="text" id="searchBar" placeholder="Search by category or title...">
-    </div>
-
-    <div class="filter-container">
-        <select id="categoryFilter">
-            <option value="all">All Categories</option>
-            <option value="nature">Nature</option>
-            <option value="space">Space</option>
-            <option value="city">City</option>
-        </select>
+        <input type="text" id="searchBar" placeholder="Search by title...">
     </div>
 
     <div class="gallery" id="imageGallery">
@@ -120,33 +98,21 @@
     <script>
         const imageGallery = document.getElementById('imageGallery');
         const searchBar = document.getElementById('searchBar');
-        const categoryFilter = document.getElementById('categoryFilter');
 
-        // Array of images with additional metadata (category, title)
+        // Array of images with additional metadata (title)
         const imageUrls = [
             {
                 url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/0a7e264631202a94c4695bc60b08eb11.png',
-                category: 'city',
                 title: 'Beautiful Mountain'
             },
             {
-                url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image%201.png',
-                category: 'space',
+                url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image%206.jpg',
                 title: 'Space Galaxy'
             },
             {
-                url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image%202.jpg',
-                category: 'city',
+                url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/image%201.jpg',
                 title: 'City Lights'
             }
-
-              {
-                url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image%203.jpg',
-                category: 'city',
-                title: 'City Lights'
-            }
-
-            
         ];
 
         let favorites = [];
@@ -180,21 +146,16 @@
             }
         }
 
-        // Function to filter and search images
-        function filterImages() {
+        // Function to search images by title
+        function searchImages() {
             const searchQuery = searchBar.value.toLowerCase();
-            const selectedCategory = categoryFilter.value;
 
-            const filteredImages = imageUrls.filter(image => {
-                const matchesSearch = image.title.toLowerCase().includes(searchQuery) || image.category.toLowerCase().includes(searchQuery);
-                const matchesCategory = selectedCategory === 'all' || image.category === selectedCategory;
-                return matchesSearch && matchesCategory;
-            });
+            const filteredImages = imageUrls.filter(image => image.title.toLowerCase().includes(searchQuery));
 
             displayImages(filteredImages);
         }
 
-        // Display images dynamically
+        // Function to display images dynamically
         function displayImages(images) {
             imageGallery.innerHTML = '';  // Clear existing images
 
@@ -236,9 +197,8 @@
         // Initial display of images
         displayImages(imageUrls);
 
-        // Add event listeners for filtering and searching
-        searchBar.addEventListener('input', filterImages);
-        categoryFilter.addEventListener('change', filterImages);
+        // Event listener for search input
+        searchBar.addEventListener('input', searchImages);
     </script>
 </body>
 </html>
