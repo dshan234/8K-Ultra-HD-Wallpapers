@@ -3,40 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Gallery</title>
+    <title>Enhanced Image Gallery</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #222;
             color: white;
-            text-align: center;
             margin: 0;
             padding: 0;
             overflow-x: hidden;
-            position: relative;
-            animation: gradientAnimation 10s ease infinite; /* Animation for background */
-        }
-
-        @keyframes gradientAnimation {
-            0% {
-                background: linear-gradient(45deg, #ff7e5f, #feb47b);
-            }
-            25% {
-                background: linear-gradient(45deg, #6a11cb, #2575fc);
-            }
-            50% {
-                background: linear-gradient(45deg, #ffafbd, #ffc3a0);
-            }
-            75% {
-                background: linear-gradient(45deg, #00b4db, #0083b0);
-            }
-            100% {
-                background: linear-gradient(45deg, #ff7e5f, #feb47b);
-            }
         }
 
         h1 {
             font-size: 2.5rem;
             margin-top: 20px;
+            text-align: center;
         }
 
         .gallery {
@@ -44,20 +25,21 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 20px;
+            padding: 20px;
         }
 
         .gallery-item {
             margin: 20px;
             text-align: center;
             max-width: 400px;
+            position: relative;
         }
 
         .gallery img {
             width: 100%;
             height: auto;
             border-radius: 8px;
-            transition: transform 0.3s ease;
-            cursor: pointer;
+            transition: transform 0.3s ease, opacity 0.3s ease;
         }
 
         .gallery img:hover {
@@ -79,6 +61,17 @@
             background-color: #444;
         }
 
+        .search-container {
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .search-container input {
+            padding: 10px;
+            width: 300px;
+            font-size: 1rem;
+        }
+
         .favorite-btn {
             margin-top: 5px;
             padding: 5px 10px;
@@ -96,145 +89,166 @@
             background-color: #4CAF50;
         }
 
-        /* Dark theme */
-        body.dark-theme {
-            background-color: #121212;
-            color: white;
-        }
-
-        body.light-theme {
-            background-color: white;
-            color: black;
-        }
-
-        #themeToggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 10px;
-            background-color: #333;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        #themeToggle:hover {
-            background-color: #444;
-        }
-
-        .modal {
-            display: none;
+        /* Slideshow and Fullscreen Image */
+        .fullscreen {
             position: fixed;
-            z-index: 1;
-            left: 0;
             top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.5s;
         }
 
-        .modal-content {
-            margin: 15% auto;
-            padding: 20px;
-            background-color: white;
-            color: black;
-            width: 80%;
+        .fullscreen img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
         }
 
-        .close {
-            color: white;
-            font-size: 30px;
-            font-weight: bold;
-            float: right;
-            cursor: pointer;
+        .fullscreen.show {
+            visibility: visible;
+            opacity: 1;
         }
 
-        .search-container {
+        /* Animated Background */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://source.unsplash.com/random') no-repeat center center fixed;
+            background-size: cover;
+            z-index: -1;
+            animation: backgroundAnimation 30s infinite;
+        }
+
+        @keyframes backgroundAnimation {
+            0% { background-position: 0 0; }
+            100% { background-position: 100% 100%; }
+        }
+
+        /* Light/Dark Theme */
+        body.dark-mode {
+            background-color: #111;
+        }
+
+        /* Social Media Buttons */
+        .social-media {
             margin-top: 20px;
         }
 
-        .search-container input {
+        .social-media button {
             padding: 10px;
-            width: 300px;
-            font-size: 1rem;
+            margin: 5px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
+
+        .social-media button:hover {
+            background-color: #0056b3;
+        }
+
     </style>
 </head>
 <body>
-    <button id="themeToggle">Toggle Theme</button>
-    <h1>Image Gallery</h1>
-
+    <h1>Enhanced Image Gallery</h1>
     <div class="search-container">
-        <input type="text" id="searchBar" placeholder="Search by title...">
+        <input type="text" id="searchBar" placeholder="Search by title..." onkeyup="searchImages()">
     </div>
 
     <div class="gallery" id="imageGallery">
         <!-- Images will be dynamically loaded here -->
     </div>
 
-    <!-- Modal for image preview -->
-    <div id="imageModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <img id="modalImage" src="" alt="" style="width: 100%;">
-        </div>
+    <!-- Fullscreen Image -->
+    <div class="fullscreen" id="fullscreenImage">
+        <img id="fullscreenImg" src="" alt="Fullscreen Image">
     </div>
+
+    <!-- Social Media Sharing -->
+    <div class="social-media">
+        <button onclick="shareOnFacebook()">Share on Facebook</button>
+        <button onclick="shareOnTwitter()">Share on Twitter</button>
+    </div>
+
+    <div class="background-animation"></div>
 
     <script>
         const imageGallery = document.getElementById('imageGallery');
         const searchBar = document.getElementById('searchBar');
-        const themeToggle = document.getElementById('themeToggle');
-        const modal = document.getElementById('imageModal');
-        const modalImage = document.getElementById('modalImage');
-        const closeModal = document.querySelector('.close');
+        const fullscreenImage = document.getElementById('fullscreenImage');
+        const fullscreenImg = document.getElementById('fullscreenImg');
 
-        // Array of images with additional metadata
         const imageUrls = [
-            {
-                url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/0a7e264631202a94c4695bc60b08eb11.png',
-                title: 'Beautiful Mountain'
-            },
-            {
-                url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image3.png',
-                title: 'Space Galaxy'
-            },
-            {
-                url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image2.png',
-                title: 'City Lights'
-            }
+            { url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/0a7e264631202a94c4695bc60b08eb11.png', title: 'Beautiful Mountain' },
+            { url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image3.png', title: 'Space Galaxy' },
+            { url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image2.png', title: 'City Lights' }
         ];
 
         let favorites = [];
 
-        // Function to handle image modal preview
-        function openModal(imageUrl) {
-            modal.style.display = "block";
-            modalImage.src = imageUrl;
+        function displayImages(images) {
+            imageGallery.innerHTML = '';
+            images.forEach(image => {
+                const imgContainer = document.createElement('div');
+                imgContainer.classList.add('gallery-item');
+
+                const img = document.createElement('img');
+                img.src = image.url;
+                img.alt = image.title;
+                img.addEventListener('click', () => openFullscreen(image.url));
+
+                const likeButton = document.createElement('button');
+                likeButton.innerText = 'Like';
+                likeButton.addEventListener('click', () => toggleLike(image.title));
+
+                const downloadButton = document.createElement('button');
+                downloadButton.innerText = 'Download';
+                downloadButton.addEventListener('click', () => downloadImage(image.url));
+
+                const favoriteButton = document.createElement('button');
+                favoriteButton.innerText = favorites.includes(image.title) ? 'Remove from Favorites' : 'Add to Favorites';
+                favoriteButton.classList.add('favorite-btn');
+                favoriteButton.addEventListener('click', () => toggleFavorite(image));
+
+                imgContainer.appendChild(img);
+                imgContainer.appendChild(likeButton);
+                imgContainer.appendChild(downloadButton);
+                imgContainer.appendChild(favoriteButton);
+                imageGallery.appendChild(imgContainer);
+            });
         }
 
-        // Close the modal when clicked outside or on the close button
-        closeModal.onclick = function () {
-            modal.style.display = "none";
-        };
+        function openFullscreen(url) {
+            fullscreenImage.classList.add('show');
+            fullscreenImg.src = url;
+        }
 
-        window.onclick = function (event) {
-            if (event.target === modal) {
-                modal.style.display = "none";
-            }
-        };
+        fullscreenImage.addEventListener('click', () => fullscreenImage.classList.remove('show'));
 
-        // Function to handle image download
-        function downloadImage(url, imageName) {
+        function toggleLike(title) {
+            alert(`${title} liked!`);
+        }
+
+        function downloadImage(url) {
             const a = document.createElement('a');
             a.href = url;
-            a.download = imageName || 'downloaded_image';
+            a.download = url.split('/').pop();
             a.click();
         }
 
-        // Function to handle favorite button
         function toggleFavorite(image) {
-            const favoriteButton = document.getElementById(`favButton-${image.title}`);
+            const favoriteButton = document.getElementById(image.title);
             if (favorites.includes(image.title)) {
                 favorites = favorites.filter(fav => fav !== image.title);
                 favoriteButton.classList.remove('liked');
@@ -246,59 +260,24 @@
             }
         }
 
-        // Function to search images by title
         function searchImages() {
             const searchQuery = searchBar.value.toLowerCase();
-
             const filteredImages = imageUrls.filter(image => image.title.toLowerCase().includes(searchQuery));
-
             displayImages(filteredImages);
         }
 
-        // Function to display images dynamically
-        function displayImages(images) {
-            imageGallery.innerHTML = '';  // Clear existing images
-
-            images.forEach(image => {
-                const imgContainer = document.createElement('div');
-                imgContainer.classList.add('gallery-item');
-                
-                const img = document.createElement('img');
-                img.src = image.url;
-                img.alt = image.title;
-                img.addEventListener('click', () => openModal(image.url));
-
-                // Create Download Button
-                const downloadButton = document.createElement('button');
-                downloadButton.innerText = 'Download';
-                downloadButton.addEventListener('click', () => downloadImage(image.url, `${image.title}.png`));
-
-                // Create Favorite Button
-                const favoriteButton = document.createElement('button');
-                favoriteButton.id = `favButton-${image.title}`;
-                favoriteButton.innerText = favorites.includes(image.title) ? 'Remove from Favorites' : 'Add to Favorites';
-                favoriteButton.classList.add('favorite-btn');
-                favoriteButton.addEventListener('click', () => toggleFavorite(image));
-
-                // Append elements to the container
-                imgContainer.appendChild(img);
-                imgContainer.appendChild(downloadButton);
-                imgContainer.appendChild(favoriteButton);
-                imageGallery.appendChild(imgContainer);
-            });
+        // Social media share functions
+        function shareOnFacebook() {
+            window.open('https://www.facebook.com/sharer/sharer.php?u=' + window.location.href, '_blank');
         }
 
-        // Initial display of images
+        function shareOnTwitter() {
+            window.open('https://twitter.com/intent/tweet?url=' + window.location.href, '_blank');
+        }
+
+        // Initial images display
         displayImages(imageUrls);
 
-        // Event listener for search input
-        searchBar.addEventListener('input', searchImages);
-
-        // Dark/Light Mode Toggle
-        themeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-theme');
-            document.body.classList.toggle('light-theme');
-        });
     </script>
 </body>
 </html>
