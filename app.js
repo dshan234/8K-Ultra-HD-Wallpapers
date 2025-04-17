@@ -1,108 +1,126 @@
-// Supabase URL and anon key
+// Supabase URL and anon key (Replace with your actual credentials)
 const supabaseUrl = 'https://kghqkcbrxnbytmchilcj.supabase.co';
-const supabaseKey = 'YOUR_ANON_KEY';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnaHFrY2JyeG5ieXRtY2hpbGNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4ODIxMDYsImV4cCI6MjA2MDQ1ODEwNn0.Ya4M9Kmmpj_zfIqyiSj6avIqpvLOeuj8b2AoTU0N6Mc';  // Replace with your new anon key
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 // DOM Elements
-const fileInput = document.getElementById('file');
-const uploadButton = document.getElementById('uploadButton');
-const uploadStatus = document.getElementById('uploadStatus');
-const wallpapersDiv = document.getElementById('wallpapers');
+const fileInput = document.getElementById('fileInput');
+const uploadBtn = document.getElementById('uploadBtn');
+const imageGallery = document.getElementById('imageGallery');
 
 // Upload function to Supabase Storage
-async function uploadWallpaper() {
+async function uploadImage() {
   const file = fileInput.files[0];
   if (!file) {
-    alert('Please select a file.');
+    alert('Please select an image to upload.');
     return;
   }
 
-  uploadStatus.textContent = 'Uploading...';
+  // Upload image to Supabase storage in 'images' folder
+  const { data, error } = await supabase.storage
+    .from('images')
+    .upload(`public/${file.name}`, file);
 
-  try {
-    // Upload image to Supabase storage in 'wallpapers' folder
-    const { data, error } = await supabase.storage
-      .from('wallpapers')
-      .upload(`public/${file.name}`, file);
-
-    if (error) {
-      uploadStatus.textContent = `Error: ${error.message}`;
-      return;
-    }
-
-    // Insert metadata into the wallpapers table
-    await insertWallpaperMetadata(file.name);
-    uploadStatus.textContent = 'Upload successful!';
-    fetchWallpapers(); // Fetch the latest wallpapers
-  } catch (error) {
-    uploadStatus.textContent = `Error: ${error.message}`;
+  if (error) {
+    alert('Error uploading image: ' + error.message);
+    return;
   }
-}
 
-// Insert wallpaper metadata into Supabase database
-async function insertWallpaperMetadata(fileName) {
-  const { data, error } = await supabase
+  // Insert metadata into the database
+  const { data: insertedData, error: dbError } = await supabase
     .from('wallpapers')
     .insert([
-      { url: fileName, likes: 0, downloads: 0 }
+      { url: file.name, likes: 0, downloads: 0 }
     ]);
-  if (error) {
-    alert('Error inserting metadata: ' + error.message);
+
+  if (dbError) {
+    alert('Error inserting metadata: ' + dbError.message);
+    return;
   }
+
+  alert('Image uploaded successfully!');
+  fetchImages(); // Fetch updated images after upload
 }
 
-// Fetch and display wallpapers from Supabase
-async function fetchWallpapers() {
+// Fetch and display images from Supabase
+async function fetchImages() {
   const { data, error } = await supabase
     .from('wallpapers')
     .select('*');
 
   if (error) {
-    alert('Error fetching wallpapers: ' + error.message);
+    alert('Error fetching images: ' + error.message);
     return;
   }
 
-  wallpapersDiv.innerHTML = ''; // Clear existing wallpapers
-  data.forEach(wallpaper => {
-    const wallpaperElement = document.createElement('div');
-    wallpaperElement.classList.add('wallpaper-card');
-    wallpaperElement.innerHTML = `
-      <img src="https://kghqkcbrxnbytmchilcj.supabase.co/storage/v1/object/public/wallpapers/${wallpaper.url}" class="wallpaper-image">
-      <button onclick="likeWallpaper('${wallpaper.id}')">Like</button>
-      <button onclick="downloadWallpaper('${wallpaper.url}')">Download</button>
+  imageGallery.innerHTML = ''; // Clear existing images
+
+  data.forEach(image => {
+    const imageUrl = `https://kghqkcbrxnbytmchilcj.supabase.co/storage/v1/object/public/images/${image.url}`;
+
+    // Create an image item
+    const imageItem = document.createElement('div');
+    imageItem.classList.add('image-item');
+    
+    // Image element
+    const imgElement = document.createElement('img');
+    imgElement.src = imageUrl;
+    imgElement.alt = 'Uploaded Image';
+    imgElement.classList.add('gallery-img');
+    
+    // Image info with like and download buttons
+    const imageInfo = document.createElement('div');
+    imageInfo.classList.add('image-info');
+    imageInfo.innerHTML = `
+      <span>Likes: ${image.likes}</span> | 
+      <span>Downloads: ${image.downloads}</span>
+      <br>
+      <span class="like-download-btn" onclick="likeImage('${image.id}')">❤️ Like</span>
+      <span class="like-download-btn" onclick="downloadImage('${image.id}')">⬇️ Download</span>
     `;
-    wallpapersDiv.appendChild(wallpaperElement);
+    
+    imageItem.appendChild(imgElement);
+    imageItem.appendChild(imageInfo);
+    
+    // Append the image item to the gallery
+    imageGallery.appendChild(imageItem);
   });
 }
 
-// Like functionality
-async function likeWallpaper(wallpaperId) {
+// Like button functionality
+async function likeImage(id) {
   const { data, error } = await supabase
     .from('wallpapers')
     .update({ likes: supabase.raw('likes + 1') })
-    .eq('id', wallpaperId);
+    .eq('id', id);
 
   if (error) {
-    alert('Error liking wallpaper: ' + error.message);
+    alert('Error liking image: ' + error.message);
+    return;
   }
-  fetchWallpapers();
+
+  alert('Image liked!');
+  fetchImages(); // Refresh the gallery after liking
 }
 
-// Download wallpaper
-async function downloadWallpaper(url) {
+// Download button functionality
+async function downloadImage(id) {
   const { data, error } = await supabase
     .from('wallpapers')
     .update({ downloads: supabase.raw('downloads + 1') })
-    .eq('url', url);
+    .eq('id', id);
 
   if (error) {
-    alert('Error tracking download: ' + error.message);
+    alert('Error downloading image: ' + error.message);
+    return;
   }
-  window.location.href = `https://kghqkcbrxnbytmchilcj.supabase.co/storage/v1/object/public/wallpapers/${url}`;
+
+  alert('Image downloaded!');
+  fetchImages(); // Refresh the gallery after download
 }
 
-// Fetch wallpapers when the page loads
-fetchWallpapers();
+// Event listener for the upload button
+uploadBtn.addEventListener('click', uploadImage);
 
-// Event listeners
-uploadButton.addEventListener('click', uploadWallpaper);
+// Fetch images when the page loads
+fetchImages();
