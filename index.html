@@ -77,6 +77,8 @@
             // Loop through the data and create image elements
             data.forEach(image => {
                 const imageUrl = `https://kghqkcbrxnbytmchilcj.supabase.co/storage/v1/object/public/images/${image.url}`;
+                const imageUrl = `https://kghqkcbrxnbytmchilcj.supabase.co/storage/v1/object/public/wallpapers/${image.url}`;
+                const imageUrl = `https://kghqkcbrxnbytmchilcj.supabase.co/storage/v1/object/public/wallpapers//1744835544675.png_image.png`;
                 
                 // Create image element
                 const imgElement = document.createElement('img');
