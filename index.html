@@ -1,21 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wallpaper Upload</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallpaper Gallery</title>
+
+    <!-- Inline CSS for styling -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1f1f1f;
+            color: #f1f1f1;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            color: #fff;
+            margin-top: 20px;
+        }
+
+        .gallery-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px;
+        }
+
+        .gallery-img {
+            width: 250px;
+            height: 250px;
+            object-fit: cover;
+            margin: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-img:hover {
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Wallpaper Upload</h1>
-    <input type="file" id="file" accept="image/*">
-    <button id="uploadButton">Upload</button>
-    <div id="uploadStatus"></div>
-    <div id="wallpapers" class="wallpapers"></div>
-  </div>
+    <h1>Wallpaper Gallery</h1>
+    
+    <div id="imageGallery" class="gallery-container">
+        <!-- Images will be inserted here dynamically -->
+    </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script src="app.js"></script>
+    <!-- Script to include Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://kghqkcbrxnbytmchilcj.supabase.co';
+        const supabaseKey = 'YOUR_ANON_KEY';  // Replace with your Supabase anon key
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Function to fetch and display images from Supabase
+        async function fetchImages() {
+            const { data, error } = await supabase
+                .from('wallpapers') // Ensure the table is named 'wallpapers'
+                .select('*');
+
+            if (error) {
+                console.error('Error fetching images: ', error.message);
+                alert('Error fetching images.');
+                return;
+            }
+
+            const imageGallery = document.getElementById('imageGallery');
+            imageGallery.innerHTML = ''; // Clear existing images
+
+            // Loop through the data and create image elements
+            data.forEach(image => {
+                const imageUrl = `https://kghqkcbrxnbytmchilcj.supabase.co/storage/v1/object/public/images/${image.url}`;
+                
+                // Create image element
+                const imgElement = document.createElement('img');
+                imgElement.src = imageUrl;
+                imgElement.alt = 'Wallpaper';
+                imgElement.classList.add('gallery-img');
+                
+                // Append image to gallery
+                imageGallery.appendChild(imgElement);
+            });
+        }
+
+        // Call the function to fetch images on page load
+        fetchImages();
+    </script>
 </body>
 </html>
