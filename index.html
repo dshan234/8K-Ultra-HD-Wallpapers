@@ -3,99 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wallpaper Gallery</title>
-
-    <!-- Inline CSS for styling -->
+    <title>Image Gallery</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #1f1f1f;
-            color: #f1f1f1;
+            background-color: #333;
+            color: white;
             text-align: center;
-            margin: 0;
-            padding: 0;
         }
 
-        h1 {
-            color: #fff;
-            margin-top: 20px;
-        }
-
-        .gallery-container {
+        .gallery {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            margin: 20px;
         }
 
-        .gallery-img {
-            width: 250px;
-            height: 250px;
+        .gallery img {
+            margin: 10px;
+            width: 200px;
+            height: 200px;
             object-fit: cover;
-            margin: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
             transition: transform 0.3s ease;
         }
 
-        .gallery-img:hover {
+        .gallery img:hover {
             transform: scale(1.05);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <h1>Wallpaper Gallery</h1>
-    
-    <div id="imageGallery" class="gallery-container">
-        <!-- Images will be inserted here dynamically -->
+    <h1>Image Gallery</h1>
+
+    <div class="gallery" id="imageGallery">
+        <!-- Images will be dynamically loaded here -->
     </div>
 
-    <!-- Script to include Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-    
     <script>
-        // Initialize Supabase
-        const supabaseUrl = 'https://kghqkcbrxnbytmchilcj.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnaHFrY2JyeG5ieXRtY2hpbGNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4ODIxMDYsImV4cCI6MjA2MDQ1ODEwNn0.Ya4M9Kmmpj_zfIqyiSj6avIqpvLOeuj8b2AoTU0N6Mc';  // Replace with your Supabase anon key
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const imageGallery = document.getElementById('imageGallery');
 
-        // Function to fetch and display images from Supabase
-        async function fetchImages() {
-            const { data, error } = await supabase
-                .from('wallpapers') // Ensure the table is named 'wallpapers'
-                .select('*');
+        // URLs of images hosted on GitHub (example)
+        const imageUrls = [
+            'https://github.com/your-username/image-gallery/raw/main/images/image1.jpg',
+            'https://github.com/your-username/image-gallery/raw/main/images/image2.jpg',
+            'https://github.com/your-username/image-gallery/raw/main/images/image3.jpg'
+        ];
 
-            .from('images') // Ensure the table is named 'images'
-                .select('*');
-
-            if (error) {
-                console.error('Error fetching images: ', error.message);
-                alert('Error fetching images.');
-                return;
-            }
-
-            const imageGallery = document.getElementById('imageGallery');
-            imageGallery.innerHTML = ''; // Clear existing images
-
-            // Loop through the data and create image elements
-            data.forEach(image => {
-                const imageUrl = `https://kghqkcbrxnbytmchilcj.supabase.co/storage/v1/object/public/images/${image.url}`;
-                const imageUrl = `https://kghqkcbrxnbytmchilcj.supabase.co/storage/v1/object/public/wallpapers/${image.url}`;
-                const imageUrl = `https://kghqkcbrxnbytmchilcj.supabase.co/storage/v1/object/public/wallpapers//1744835544675.png_image.png/${image.url}`;
-                
-                // Create image element
-                const imgElement = document.createElement('img');
-                imgElement.src = imageUrl;
-                imgElement.alt = 'Wallpaper';
-                imgElement.classList.add('gallery-img');
-                
-                // Append image to gallery
-                imageGallery.appendChild(imgElement);
-            });
-        }
-
-        // Call the function to fetch images on page load
-        fetchImages();
+        // Display images dynamically
+        imageUrls.forEach(url => {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = 'Image';
+            imageGallery.appendChild(img);
+        });
     </script>
 </body>
 </html>
