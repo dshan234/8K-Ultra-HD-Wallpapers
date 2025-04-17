@@ -5,38 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wallpaper Upload</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/supabase.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1 class="title">Upload Your Wallpapers</h1>
+    <h1>Upload Wallpaper</h1>
 
-    <!-- Upload Section -->
-    <div class="upload-section">
-      <input type="file" id="file" class="upload-input" accept="image/*">
-      <button id="uploadButton" class="upload-button">Upload Wallpaper</button>
-      <p id="uploadStatus" class="upload-status"></p>
-    </div>
+    <!-- File input (for selecting a wallpaper) -->
+    <input type="file" id="file" accept="image/*">
+    
+    <!-- Upload button hidden from the user interface -->
+    <button id="uploadButton" style="display: none;">Upload</button>
 
-    <!-- Wallpapers Gallery -->
-    <div id="wallpapers" class="wallpapers-gallery"></div>
+    <!-- Status message for upload progress -->
+    <div id="uploadStatus"></div>
 
-    <!-- Preview Modal -->
-    <div id="previewModal" class="preview-modal">
-      <div class="preview-modal-content">
-        <img id="previewImage" src="" alt="Wallpaper Preview" class="preview-image">
-        <div class="modal-buttons">
-          <button class="close-button" onclick="closePreview()">Close</button>
-          <button class="download-button" id="downloadButton">Download</button>
-        </div>
-      </div>
-    </div>
+    <!-- Display gallery of uploaded wallpapers -->
+    <div id="wallpapers" class="wallpapers"></div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script>
-    // Supabase URL and key (replace with your own project details)
+    // Supabase URL and anon key (replace with your own)
     const supabaseUrl = 'https://kghqkcbrxnbytmchilcj.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnaHFrY2JyeG5ieXRtY2hpbGNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4ODIxMDYsImV4cCI6MjA2MDQ1ODEwNn0.Ya4M9Kmmpj_zfIqyiSj6avIqpvLOeuj8b2AoTU0N6Mc'; // Provided anon key
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnaHFrY2JyeG5ieXRtY2hpbGNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4ODIxMDYsImV4cCI6MjA2MDQ1ODEwNn0.Ya4M9Kmmpj_zfIqyiSj6avIqpvLOeuj8b2AoTU0N6Mc';
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
     // DOM Elements
@@ -44,11 +35,6 @@
     const fileInput = document.getElementById('file');
     const uploadStatus = document.getElementById('uploadStatus');
     const wallpapersDiv = document.getElementById('wallpapers');
-    const previewModal = document.getElementById('previewModal');
-    const previewImage = document.getElementById('previewImage');
-    const downloadButton = document.getElementById('downloadButton');
-
-    let selectedWallpaperUrl = '';
 
     // Upload function to Supabase Storage
     async function uploadWallpaper() {
@@ -67,13 +53,38 @@
           .upload(`public/${file.name}`, file);
 
         if (error) {
-          throw error;
+          console.error('Upload error:', error);
+          uploadStatus.textContent = `Error: ${error.message}`;
+          return;
         }
 
         uploadStatus.textContent = 'Upload successful!';
-        fetchWallpapers(); // Fetch the latest wallpapers after upload
+
+        // Insert metadata into the wallpapers table
+        await insertWallpaperMetadata(file.name);
+
+        // Fetch the updated list of wallpapers
+        fetchWallpapers();
       } catch (error) {
+        console.error('Unexpected error:', error);
         uploadStatus.textContent = `Error: ${error.message}`;
+      }
+    }
+
+    // Insert wallpaper metadata into Supabase database
+    async function insertWallpaperMetadata(fileName) {
+      const { data, error } = await supabase
+        .from('wallpapers')
+        .insert([
+          {
+            url: fileName, // The filename in Supabase Storage
+            likes: 0,      // Initial like count
+            downloads: 0,  // Initial download count
+          }
+        ]);
+
+      if (error) {
+        alert('Error inserting metadata: ' + error.message);
       }
     }
 
@@ -93,7 +104,7 @@
         const wallpaperElement = document.createElement('div');
         wallpaperElement.classList.add('wallpaper-card');
         wallpaperElement.innerHTML = `
-          <img src="https://kghqkcbrxnbytmchilcj.supabase.co/storage/v1/object/public/wallpapers/${wallpaper.url}" class="wallpaper-image" onclick="openPreview('${wallpaper.url}')">
+          <img src="https://kghqkcbrxnbytmchilcj.supabase.co/storage/v1/object/public/wallpapers/${wallpaper.url}" class="wallpaper-image">
           <div class="wallpaper-actions">
             <button class="like-button" onclick="likeWallpaper('${wallpaper.id}')">Like</button>
             <button class="download-button" onclick="downloadWallpaper('${wallpaper.url}')">Download</button>
@@ -101,18 +112,6 @@
         `;
         wallpapersDiv.appendChild(wallpaperElement);
       });
-    }
-
-    // Open preview modal
-    function openPreview(url) {
-      selectedWallpaperUrl = url;
-      previewImage.src = `https://kghqkcbrxnbytmchilcj.supabase.co/storage/v1/object/public/wallpapers/${url}`;
-      previewModal.classList.remove('hidden');
-    }
-
-    // Close preview modal
-    function closePreview() {
-      previewModal.classList.add('hidden');
     }
 
     // Like functionality (track likes in Supabase)
@@ -143,9 +142,6 @@
       // Trigger download
       window.location.href = `https://kghqkcbrxnbytmchilcj.supabase.co/storage/v1/object/public/wallpapers/${url}`;
     }
-
-    // Event listener for the upload button
-    uploadButton.addEventListener('click', uploadWallpaper);
 
     // Load wallpapers when the page loads
     fetchWallpapers();
