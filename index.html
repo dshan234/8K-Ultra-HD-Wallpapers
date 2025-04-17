@@ -1,287 +1,270 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>8K HD WALLPAPERS</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #222;
-            color: white;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>8K HD WALLPAPERS</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: white;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
 
-        h1 {
-            font-size: 2.5rem;
-            margin-top: 20px;
-            text-align: center;
-        }
+    h1 {
+      font-size: 2.5rem;
+      margin-top: 20px;
+      text-align: center;
+    }
 
-        .gallery {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            padding: 20px;
-        }
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
 
-        .gallery-item {
-            margin: 20px;
-            text-align: center;
-            max-width: 400px;
-            position: relative;
-        }
+    .gallery-item {
+      margin: 20px;
+      text-align: center;
+      max-width: 400px;
+      position: relative;
+    }
 
-        .gallery img {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
+    .gallery img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      transition: transform 0.3s ease;
+    }
 
-        .gallery img:hover {
-            transform: scale(1.05);
-        }
+    .gallery img:hover {
+      transform: scale(1.05);
+    }
 
-        .gallery-item button {
-            margin-top: 10px;
-            padding: 10px 15px;
-            background-color: #555;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+    .gallery-item button {
+      margin: 10px 5px 0;
+      padding: 8px 12px;
+      background-color: #444;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
 
-        .gallery-item button:hover {
-            background-color: #444;
-        }
+    .gallery-item button:hover {
+      background-color: #333;
+    }
 
-        .search-container {
-            margin: 20px auto;
-            text-align: center;
-        }
+    .search-container {
+      margin: 20px auto;
+      text-align: center;
+    }
 
-        .search-container input {
-            padding: 10px;
-            width: 300px;
-            font-size: 1rem;
-        }
+    .search-container input {
+      padding: 10px;
+      width: 300px;
+      font-size: 1rem;
+    }
 
-        .favorite-btn {
-            margin-top: 5px;
-            padding: 5px 10px;
-            background-color: #f44336;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
+    .fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: 0.4s;
+      z-index: 1000;
+    }
 
-        .favorite-btn:hover {
-            background-color: #d32f2f;
-        }
+    .fullscreen.show {
+      visibility: visible;
+      opacity: 1;
+    }
 
-        .liked {
-            background-color: #4CAF50;
-        }
+    .fullscreen img {
+      max-width: 90%;
+      max-height: 90%;
+    }
 
-        /* Slideshow and Fullscreen Image */
-        .fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
+    .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 2rem;
+      color: white;
+      cursor: pointer;
+    }
 
-        .fullscreen img {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
-        }
+    .background-cosmetic {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background: radial-gradient(circle, #222 0%, #111 100%);
+      z-index: -2;
+    }
 
-        .fullscreen.show {
-            visibility: visible;
-            opacity: 1;
-        }
+    .cosmetic-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+      opacity: 0.08;
+      z-index: -1;
+    }
 
-        /* Animated Background */
-        .background-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('https://source.unsplash.com/random') no-repeat center center fixed;
-            background-size: cover;
-            z-index: -1;
-            animation: backgroundAnimation 30s infinite;
-        }
+    .scroll-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #555;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      z-index: 999;
+    }
 
-        @keyframes backgroundAnimation {
-            0% { background-position: 0 0; }
-            100% { background-position: 100% 100%; }
-        }
+    .scroll-top:hover {
+      background: #333;
+    }
 
-        /* Light/Dark Theme */
-        body.dark-mode {
-            background-color: #111;
-        }
+    .toggle-theme {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #444;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 99;
+    }
 
-        /* Social Media Buttons */
-        .social-media {
-            margin-top: 20px;
-        }
-
-        .social-media button {
-            padding: 10px;
-            margin: 5px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .social-media button:hover {
-            background-color: #0056b3;
-        }
-
-    </style>
+    .view-count {
+      font-size: 0.9rem;
+      color: #ccc;
+      margin-top: 8px;
+    }
+  </style>
 </head>
 <body>
-    <h1>8K HD WALLPAPERS</h1>
-    <div class="search-container">
-        <input type="text" id="searchBar" placeholder="Search by title..." onkeyup="searchImages()">
-    </div>
 
-    <div class="gallery" id="imageGallery">
-        <!-- Images will be dynamically loaded here -->
-    </div>
+  <button class="toggle-theme" onclick="toggleDarkMode()">🌙</button>
+  <h1>8K HD WALLPAPERS</h1>
 
-    <!-- Fullscreen Image -->
-    <div class="fullscreen" id="fullscreenImage">
-        <img id="fullscreenImg" src="" alt="Fullscreen Image">
-    </div>
+  <div class="search-container">
+    <input type="text" id="searchBar" placeholder="Search by title..." onkeyup="searchImages()" />
+  </div>
 
-    <!-- Social Media Sharing -->
-    <div class="social-media">
-        <button onclick="shareOnFacebook()">Share on Facebook</button>
-        <button onclick="shareOnTwitter()">Share on Twitter</button>
-    </div>
+  <div class="gallery" id="imageGallery"></div>
 
-    <div class="background-animation"></div>
+  <div class="fullscreen" id="fullscreenImage">
+    <span class="close-btn" onclick="closeFullscreen()">×</span>
+    <img id="fullscreenImg" src="" alt="Fullscreen Image"/>
+  </div>
 
-    <script>
-        const imageGallery = document.getElementById('imageGallery');
-        const searchBar = document.getElementById('searchBar');
-        const fullscreenImage = document.getElementById('fullscreenImage');
-        const fullscreenImg = document.getElementById('fullscreenImg');
+  <button class="scroll-top" onclick="scrollToTop()">⬆</button>
+  <div class="background-cosmetic"></div>
+  <div class="cosmetic-overlay"></div>
 
-        const imageUrls = [
-            { url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image1.png', title: 'RED GIRL' },
-            { url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image2.png', title: 'RED GIRL' },
-            { url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image3.png', title: 'RED GIRL' },
-            { url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image4.png', title: 'RED GIRL' },
-            { url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image5.png', title: 'RED GIRL' },
-            { url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image6.png', title: 'RED GIRL' }
-            
-        ];
+  <script>
+    const imageGallery = document.getElementById('imageGallery');
+    const searchBar = document.getElementById('searchBar');
+    const fullscreenImage = document.getElementById('fullscreenImage');
+    const fullscreenImg = document.getElementById('fullscreenImg');
+    const scrollTopBtn = document.querySelector('.scroll-top');
 
-        let favorites = [];
+    const imageUrls = [
+      { url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image1.png', title: 'Red Girl' },
+      { url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image2.png', title: 'City View' },
+      { url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image3.png', title: 'Galaxy Girl' },
+      { url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image4.png', title: 'Shadow' },
+      { url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image5.png', title: 'Cyber City' },
+      { url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image6.png', title: 'Dark Night' }
+    ];
 
-        function displayImages(images) {
-            imageGallery.innerHTML = '';
-            images.forEach(image => {
-                const imgContainer = document.createElement('div');
-                imgContainer.classList.add('gallery-item');
+    function displayImages(images) {
+      imageGallery.innerHTML = '';
+      images.forEach((image, i) => {
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'gallery-item';
 
-                const img = document.createElement('img');
-                img.src = image.url;
-                img.alt = image.title;
-                img.addEventListener('click', () => openFullscreen(image.url));
+        const img = document.createElement('img');
+        img.src = image.url;
+        img.alt = image.title;
+        img.addEventListener('click', () => openFullscreen(image.url));
 
-                const likeButton = document.createElement('button');
-                likeButton.innerText = 'Like';
-                likeButton.addEventListener('click', () => toggleLike(image.title));
+        const likeBtn = document.createElement('button');
+        likeBtn.innerText = '❤️ Like';
+        likeBtn.onclick = () => alert('You liked this image!');
 
-                const downloadButton = document.createElement('button');
-                downloadButton.innerText = 'Download';
-                downloadButton.addEventListener('click', () => downloadImage(image.url));
+        const downloadBtn = document.createElement('button');
+        downloadBtn.innerText = '⬇️ Download';
+        downloadBtn.onclick = () => downloadImage(image.url);
 
-                const favoriteButton = document.createElement('button');
-                favoriteButton.innerText = favorites.includes(image.title) ? 'Remove from Favorites' : 'Add to Favorites';
-                favoriteButton.classList.add('favorite-btn');
-                favoriteButton.addEventListener('click', () => toggleFavorite(image));
+        const viewCounter = document.createElement('div');
+        viewCounter.className = 'view-count';
+        viewCounter.innerText = `Views: ${Math.floor(Math.random() * 1000 + 100)}`;
 
-                imgContainer.appendChild(img);
-                imgContainer.appendChild(likeButton);
-                imgContainer.appendChild(downloadButton);
-                imgContainer.appendChild(favoriteButton);
-                imageGallery.appendChild(imgContainer);
-            });
-        }
+        imgContainer.append(img, likeBtn, downloadBtn, viewCounter);
+        imageGallery.appendChild(imgContainer);
+      });
+    }
 
-        function openFullscreen(url) {
-            fullscreenImage.classList.add('show');
-            fullscreenImg.src = url;
-        }
+    function searchImages() {
+      const q = searchBar.value.toLowerCase();
+      const filtered = imageUrls.filter(img => img.title.toLowerCase().includes(q));
+      displayImages(filtered);
+    }
 
-        fullscreenImage.addEventListener('click', () => fullscreenImage.classList.remove('show'));
+    function openFullscreen(url) {
+      fullscreenImg.src = url;
+      fullscreenImage.classList.add('show');
+    }
 
-        function toggleLike(title) {
-            alert(`${title} liked!`);
-        }
+    function closeFullscreen() {
+      fullscreenImage.classList.remove('show');
+    }
 
-        function downloadImage(url) {
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = url.split('/').pop();
-            a.click();
-        }
+    function downloadImage(url) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = url.split('/').pop();
+      a.click();
+    }
 
-        function toggleFavorite(image) {
-            const favoriteButton = document.getElementById(image.title);
-            if (favorites.includes(image.title)) {
-                favorites = favorites.filter(fav => fav !== image.title);
-                favoriteButton.classList.remove('liked');
-                favoriteButton.innerText = 'Add to Favorites';
-            } else {
-                favorites.push(image.title);
-                favoriteButton.classList.add('liked');
-                favoriteButton.innerText = 'Remove from Favorites';
-            }
-        }
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-        function searchImages() {
-            const searchQuery = searchBar.value.toLowerCase();
-            const filteredImages = imageUrls.filter(image => image.title.toLowerCase().includes(searchQuery));
-            displayImages(filteredImages);
-        }
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
 
-        // Social media share functions
-        function shareOnFacebook() {
-            window.open('https://www.facebook.com/sharer/sharer.php?u=' + window.location.href, '_blank');
-        }
+    window.onscroll = () => {
+      scrollTopBtn.style.display = window.scrollY > 100 ? 'block' : 'none';
+    };
 
-        function shareOnTwitter() {
-            window.open('https://twitter.com/intent/tweet?url=' + window.location.href, '_blank');
-        }
-
-        // Initial images display
-        displayImages(imageUrls);
-
-    </script>
+    displayImages(imageUrls);
+  </script>
 </body>
 </html>
