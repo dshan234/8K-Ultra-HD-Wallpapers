@@ -12,22 +12,27 @@
             text-align: center;
         }
 
+        h1 {
+            font-size: 2.5rem;
+            margin-top: 20px;
+        }
+
         .gallery {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
+            gap: 20px; /* Adds space between images */
         }
 
         .gallery-item {
             margin: 20px;
-            width: 300px;
             text-align: center;
+            max-width: 400px;
         }
 
         .gallery img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
+            width: 100%; /* Makes the image responsive */
+            height: auto; /* Maintains the aspect ratio */
             border-radius: 8px;
             transition: transform 0.3s ease;
         }
@@ -51,18 +56,62 @@
             background-color: #444;
         }
 
-        h1 {
-            font-size: 2.5rem;
+        .search-container {
             margin-top: 20px;
         }
 
-        .like-btn {
+        .search-container input {
+            padding: 10px;
+            width: 300px;
+            font-size: 1rem;
+        }
+
+        .filter-container {
+            margin-top: 20px;
+        }
+
+        .filter-container select {
+            padding: 10px;
+            font-size: 1rem;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .favorite-btn {
             margin-top: 5px;
+            padding: 5px 10px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .favorite-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .liked {
+            background-color: #4CAF50; /* Green when liked */
         }
     </style>
 </head>
 <body>
     <h1>Image Gallery</h1>
+
+    <div class="search-container">
+        <input type="text" id="searchBar" placeholder="Search by category or title...">
+    </div>
+
+    <div class="filter-container">
+        <select id="categoryFilter">
+            <option value="all">All Categories</option>
+            <option value="nature">Nature</option>
+            <option value="space">Space</option>
+            <option value="city">City</option>
+        </select>
+    </div>
 
     <div class="gallery" id="imageGallery">
         <!-- Images will be dynamically loaded here -->
@@ -70,76 +119,126 @@
 
     <script>
         const imageGallery = document.getElementById('imageGallery');
+        const searchBar = document.getElementById('searchBar');
+        const categoryFilter = document.getElementById('categoryFilter');
 
-        // Add URLs of multiple images
+        // Array of images with additional metadata (category, title)
         const imageUrls = [
-            'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/0a7e264631202a94c4695bc60b08eb11.png',
-            'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/0a7e264631202a94c4695bc60b08eb11.png',
-            'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/0a7e264631202a94c4695bc60b08eb11.png',  // Add more image URLs here
-            'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/0a7e264631202a94c4695bc60b08eb11.png',   // Add more image URLs here
-            'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/0a7e264631202a94c4695bc60b08eb11.png',
-            'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/0a7e264631202a94c4695bc60b08eb11.png',  // Add more image URLs here
-            'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/0a7e264631202a94c4695bc60b08eb11.png',
+            {
+                url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/0a7e264631202a94c4695bc60b08eb11.png',
+                category: 'GIRL 1',
+                title: 'Beautiful Mountain'
+            },
+            {
+                url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image%201.png',
+                category: 'space',
+                title: 'Space Galaxy'
+            },
+            {
+                url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image%202.jpg',
+                category: 'city',
+                title: 'City Lights'
+            }
 
+              {
+                url: 'https://raw.githubusercontent.com/dshan234/8K-Ultra-HD-Wallpapers/main/Image%203.jpg',
+                category: 'GIRL 4',
+                title: 'City Lights'
+            }
+
+            
         ];
+
+        let favorites = [];
 
         // Function to handle image download
         function downloadImage(url, imageName) {
             const a = document.createElement('a');
             a.href = url;
-            a.download = imageName || 'downloaded_image'; // Set a default filename if none is provided
+            a.download = imageName || 'downloaded_image';
             a.click();
         }
 
         // Function to handle image like
         function likeImage(imageId) {
             let likeButton = document.getElementById(imageId);
-            let currentLikes = parseInt(likeButton.innerText.split(' ')[1]);
-            likeButton.innerText = `Like (${currentLikes + 1})`;
+            likeButton.classList.toggle('liked');
+            likeButton.innerText = likeButton.classList.contains('liked') ? 'Liked' : 'Like';
+        }
+
+        // Function to handle favorite button
+        function toggleFavorite(image) {
+            const favoriteButton = document.getElementById(`favButton-${image.title}`);
+            if (favorites.includes(image.title)) {
+                favorites = favorites.filter(fav => fav !== image.title);
+                favoriteButton.classList.remove('liked');
+                favoriteButton.innerText = 'Add to Favorites';
+            } else {
+                favorites.push(image.title);
+                favoriteButton.classList.add('liked');
+                favoriteButton.innerText = 'Remove from Favorites';
+            }
+        }
+
+        // Function to filter and search images
+        function filterImages() {
+            const searchQuery = searchBar.value.toLowerCase();
+            const selectedCategory = categoryFilter.value;
+
+            const filteredImages = imageUrls.filter(image => {
+                const matchesSearch = image.title.toLowerCase().includes(searchQuery) || image.category.toLowerCase().includes(searchQuery);
+                const matchesCategory = selectedCategory === 'all' || image.category === selectedCategory;
+                return matchesSearch && matchesCategory;
+            });
+
+            displayImages(filteredImages);
         }
 
         // Display images dynamically
-        imageUrls.forEach((url, index) => {
-            const imgContainer = document.createElement('div');
-            imgContainer.classList.add('gallery-item');
-            
-            const img = document.createElement('img');
-            img.src = url;
-            img.alt = 'Image';
+        function displayImages(images) {
+            imageGallery.innerHTML = '';  // Clear existing images
 
-            // Create Download Button
-            const downloadButton = document.createElement('button');
-            downloadButton.innerText = 'Download';
-            downloadButton.addEventListener('click', () => downloadImage(url, `image${index + 1}.png`));
+            images.forEach(image => {
+                const imgContainer = document.createElement('div');
+                imgContainer.classList.add('gallery-item');
+                
+                const img = document.createElement('img');
+                img.src = image.url;
+                img.alt = image.title;
 
-            // Create Like Button
-            const likeButton = document.createElement('button');
-            likeButton.id = `likeButton${index}`;
-            likeButton.innerText = 'Like (0)';
-            likeButton.classList.add('like-btn');
-            likeButton.addEventListener('click', () => likeImage(`likeButton${index}`));
+                // Create Download Button
+                const downloadButton = document.createElement('button');
+                downloadButton.innerText = 'Download';
+                downloadButton.addEventListener('click', () => downloadImage(image.url, `${image.title}.png`));
 
-            // Append elements to the container
-            imgContainer.appendChild(img);
-            imgContainer.appendChild(downloadButton);
-            imgContainer.appendChild(likeButton);
-            imageGallery.appendChild(imgContainer);
-        });
+                // Create Like Button
+                const likeButton = document.createElement('button');
+                likeButton.id = `likeButton-${image.title}`;
+                likeButton.innerText = 'Like';
+                likeButton.addEventListener('click', () => likeImage(`likeButton-${image.title}`));
+
+                // Create Favorite Button
+                const favoriteButton = document.createElement('button');
+                favoriteButton.id = `favButton-${image.title}`;
+                favoriteButton.innerText = favorites.includes(image.title) ? 'Remove from Favorites' : 'Add to Favorites';
+                favoriteButton.classList.add('favorite-btn');
+                favoriteButton.addEventListener('click', () => toggleFavorite(image));
+
+                // Append elements to the container
+                imgContainer.appendChild(img);
+                imgContainer.appendChild(downloadButton);
+                imgContainer.appendChild(likeButton);
+                imgContainer.appendChild(favoriteButton);
+                imageGallery.appendChild(imgContainer);
+            });
+        }
+
+        // Initial display of images
+        displayImages(imageUrls);
+
+        // Add event listeners for filtering and searching
+        searchBar.addEventListener('input', filterImages);
+        categoryFilter.addEventListener('change', filterImages);
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-           
-            
