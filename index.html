@@ -1,173 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wallpaper Gallery</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wallpaper Upload</title>
+  <!-- Link to the external CSS file -->
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/supabase.min.js"></script>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-4">
+<body>
+  <div class="container">
+    <h1 class="title">Upload Your Wallpapers</h1>
 
-  <h1 class="text-3xl font-bold mb-4">🌌 Wallpaper Gallery</h1>
+    <!-- Upload Section -->
+    <div class="upload-section">
+      <input type="file" id="file" class="upload-input" accept="image/*">
+      <button id="uploadButton" class="upload-button">Upload Wallpaper</button>
+      <p id="uploadStatus" class="upload-status"></p>
+    </div>
 
-  <div class="mb-4">
-    <input type="email" id="email" placeholder="Email" class="bg-gray-800 text-white p-2 rounded mr-2">
-    <input type="password" id="password" placeholder="Password" class="bg-gray-800 text-white p-2 rounded mr-2">
-    <button onclick="signUp()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded mr-2">Sign Up</button>
-    <button onclick="signIn()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded mr-2">Sign In</button>
-    <button onclick="signOut()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded">Sign Out</button>
-  </div>
+    <!-- Wallpapers Gallery -->
+    <div id="wallpapers" class="wallpapers-gallery"></div>
 
-  <button id="uploadBtn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded mb-6 hidden">
-    Upload Wallpaper
-  </button>
-
-  <input type="text" id="search" placeholder="Search wallpapers..." class="bg-gray-800 text-white p-2 rounded mb-4 w-full max-w-md" oninput="filterGallery()">
-
-  <div class="gallery grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full max-w-screen-xl">
-    <!-- Images will appear here -->
-  </div>
-
-  <div id="previewModal" class="fixed inset-0 bg-black bg-opacity-80 hidden items-center justify-center z-50">
-    <div class="relative max-w-3xl w-full p-4">
-      <button onclick="closeModal()" class="absolute top-2 right-2 text-white text-xl">&times;</button>
-      <img id="modalImage" src="" class="w-full rounded" />
-      <div class="mt-2 flex gap-4">
-        <button id="likeBtn" class="bg-pink-600 px-4 py-2 rounded">Like ❤️</button>
-        <button id="downloadBtn" class="bg-blue-600 px-4 py-2 rounded">Download ⬇️</button>
-        <button id="deleteBtn" class="bg-red-600 px-4 py-2 rounded hidden">Delete 🗑️</button>
+    <!-- Preview Modal -->
+    <div id="previewModal" class="preview-modal">
+      <div class="preview-modal-content">
+        <img id="previewImage" src="" alt="Wallpaper Preview" class="preview-image">
+        <div class="modal-buttons">
+          <button class="close-button" onclick="closePreview()">Close</button>
+          <button class="download-button" id="downloadButton">Download</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <script>
-    const supabaseUrl = 'https://kghqkcbrxnbytmchilcj.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnaHFrY2JyeG5ieXRtY2hpbGNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4ODIxMDYsImV4cCI6MjA2MDQ1ODEwNn0.Ya4M9Kmmpj_zfIqyiSj6avIqpvLOeuj8b2AoTU0N6Mc';
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-    let currentUser = null;
-    let allWallpapers = [];
-
-    async function checkUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      currentUser = user;
-      document.getElementById('uploadBtn').classList.toggle('hidden', !user);
-    }
-
-    checkUser();
-
-    async function signUp() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const { error } = await supabase.auth.signUp({ email, password });
-      if (error) alert(error.message);
-      else alert('Signup successful! Check your email to confirm.');
-    }
-
-    async function signIn() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) alert(error.message);
-      else location.reload();
-    }
-
-    async function signOut() {
-      await supabase.auth.signOut();
-      location.reload();
-    }
-
-    document.getElementById('uploadBtn').onclick = async () => {
-      const file = await selectFile();
-      if (!file) return;
-
-      const tag = prompt("Enter tag: live or static");
-      const filePath = `${Date.now()}_${file.name}`;
-      const { error } = await supabase.storage.from('wallpapers').upload(filePath, file);
-      if (!error) {
-        const url = `${supabaseUrl}/storage/v1/object/public/wallpapers/${filePath}`;
-        addImageToGallery({ name: filePath, url, tag, owner: currentUser.id });
-      } else {
-        alert('Upload failed');
-      }
-    };
-
-    function selectFile() {
-      return new Promise(resolve => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = () => resolve(input.files[0]);
-        input.click();
-      });
-    }
-
-    function addImageToGallery(file) {
-      allWallpapers.push(file);
-      renderGallery();
-    }
-
-    function renderGallery() {
-      const search = document.getElementById('search').value.toLowerCase();
-      const gallery = document.querySelector('.gallery');
-      gallery.innerHTML = '';
-
-      allWallpapers.filter(f => f.name.toLowerCase().includes(search)).forEach(file => {
-        const card = document.createElement('div');
-        card.className = 'bg-gray-800 p-2 rounded shadow relative';
-        card.innerHTML = `
-          <img src="${file.url}" alt="Wallpaper" class="w-full h-auto rounded cursor-pointer" onclick="openModal('${file.url}', '${file.name}', '${file.owner}')">
-          <span class="absolute top-2 left-2 bg-black bg-opacity-60 text-xs px-2 py-1 rounded">${file.tag}</span>
-        `;
-        gallery.appendChild(card);
-      });
-    }
-
-    async function loadWallpapers() {
-      const { data, error } = await supabase.storage.from('wallpapers').list('', {
-        limit: 100,
-        offset: 0,
-        sortBy: { column: 'name', order: 'desc' }
-      });
-
-      if (data) {
-        allWallpapers = data.map(file => ({
-          name: file.name,
-          url: `${supabaseUrl}/storage/v1/object/public/wallpapers/${file.name}`,
-          tag: file.metadata?.tag || 'static',
-          owner: file.metadata?.owner || ''
-        }));
-        renderGallery();
-      }
-    }
-
-    function openModal(url, name, owner) {
-      document.getElementById('modalImage').src = url;
-      document.getElementById('previewModal').classList.remove('hidden');
-      document.getElementById('deleteBtn').onclick = () => deleteImage(name);
-      document.getElementById('deleteBtn').classList.toggle('hidden', currentUser?.id !== owner);
-      document.getElementById('downloadBtn').onclick = () => window.open(url, '_blank');
-    }
-
-    function closeModal() {
-      document.getElementById('previewModal').classList.add('hidden');
-    }
-
-    async function deleteImage(name) {
-      const { error } = await supabase.storage.from('wallpapers').remove([name]);
-      if (!error) {
-        allWallpapers = allWallpapers.filter(f => f.name !== name);
-        renderGallery();
-        closeModal();
-      }
-    }
-
-    function filterGallery() {
-      renderGallery();
-    }
-
-    loadWallpapers();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
